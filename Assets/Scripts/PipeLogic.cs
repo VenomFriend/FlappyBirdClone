@@ -32,6 +32,8 @@ public class PipeLogic : MonoBehaviour
             rbPipe.velocity = new Vector2(0, 0);
         }
         // I could just check if it's smaller than 0 and it would do the exact same thing
+        // But basically it checks if the player passed the pipe(or technicallly if the pipe passed the player, since the player doesn't move in the X axys, only the pipes
+        // and if he did, add some points to his score
         if( (this.gameObject.transform.position.x < objPlayer.transform.position.x) && !gaveScore)
         {
             gaveScore = true;
@@ -39,6 +41,10 @@ public class PipeLogic : MonoBehaviour
 
         }
 
+        // If it's outside of the screen, delete the object 
+        // there's probably a smarter and better way to do this, instead of creating lots of pipes and destroying them
+        // like teleporting the pipes and having only like 3 of each pipe in the game or something, and teleporting them at random times
+        // but screw it, this is easier and I don't have much time left
         if (this.gameObject.transform.position.x <= -4)
         {
             Destroy(this.gameObject);

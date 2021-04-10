@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class GroundMovement : MonoBehaviour
 {
-
+    // Don't need this script anymore, I do everything on the GameLogic
+    // But I'm not gonna delete it, 'cause maybe in the future I should make the pipes themselves control their own movements, idk
     private Rigidbody2D rbGround;
     private float groundVelocity;
     // Start is called before the first frame update

@@ -8,38 +8,38 @@ using UnityEngine.Rendering.PostProcessing;
 public class GameLogic : MonoBehaviour
 {
 
-    public float randomTimePipeDown = 0.0f;
-    public float timeCountPipeDown = 0.0f;    
+    public float randomTimePipeDown = 0.0f; // How long to wait before I spawn another pipe
+    public float timeCountPipeDown = 0.0f;    // The counter of time, when this is higher than the random time, it'll spawn the pipe
     public float randomTimePipeUp = 0.0f;
     public float timeCountPipeUp = 0.0f;
-    public GameObject pipeDown;
-    public GameObject pipeUp;
-    public float randomSize1;
+    public GameObject pipeDown; // The pipe that is down(d'uh)
+    public GameObject pipeUp; // The pipe that is up
+    public float randomSize1; // Each pipe can be of different sizes on the Y axis
     public float randomSize2;
 
-    public int playerScore;
-    GameObject txtScore;
-    Text displayScore;
+    public float playerScore; // You gain 1 point each time you pass through the pipes, yaay
+    GameObject txtScore; // I need to get the text object to display the text
+    Text displayScore; // and the text
 
-    GameObject objPlayer;
-    GameObject objProcessLayer;
+    GameObject objPlayer; // Gonna need to use a reference to the player here to get some stuff
+    GameObject objProcessLayer; // need this to do the grayscale screen magic
 
-    PostProcessVolume volume;
-    ColorGrading colorGradingLayer;
+    PostProcessVolume volume; // need this to do the saturation thing to make the screen gray
+    ColorGrading colorGradingLayer; // so many things I need to get
 
-    GameObject txtCanvas;
-    Text txtYouDied;
+    GameObject txtCanvas; // need the canvas so I can add another text on it, but this one will be the YOU DIED one
+    Text txtYouDied; 
 
 
     //Get the audio for when you die
     AudioSource audioGame;
 
-    public AudioClip deathSound;
-    public AudioClip gameMusic;
+    public AudioClip deathSound; // the YOU DIED sound
+    public AudioClip gameMusic; // the game music
 
-    private bool stopEverything;
+    private bool stopEverything; // stop the movement of everything when the player dies
 
-    public bool getStopEverything()
+    public bool getStopEverything() // use this when another script needs to know if they need to stop
     {
         return stopEverything;
     }
@@ -47,24 +47,28 @@ public class GameLogic : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        playerScore = 0;
-        txtScore = GameObject.Find("Text");
-        objPlayer = GameObject.Find("Player");
-        objProcessLayer = GameObject.Find("ProcessLayer");
-        displayScore = txtScore.GetComponent<Text>();
-        displayScore.text = playerScore.ToString();
-        stopEverything = false;
-        txtCanvas = GameObject.Find("Canvas");
-        txtYouDied = Resources.Load<Text>("YouDied");
+        playerScore = 0; // score starts at 0, d'uh
+        txtScore = GameObject.Find("Text"); // Gonna need the reference to the text object so I can update the score
+        objPlayer = GameObject.Find("Player"); // gonna need a reference to the player so I can know if he collided and died
+        objProcessLayer = GameObject.Find("ProcessLayer"); // need this to make the grayscale thing
+        displayScore = txtScore.GetComponent<Text>(); // get the score text
+        displayScore.text = "Score: " + playerScore.ToString(); // update it to be the player score
+        stopEverything = false; // player is still alive, so everything should be moving
+        txtCanvas = GameObject.Find("Canvas"); // need the canvas to be able to put the YOU DIED text on it
+        txtYouDied = Resources.Load<Text>("YouDied"); // load the YOU DIED text
 
-        audioGame = GetComponent<AudioSource>();
+        audioGame = GetComponent<AudioSource>(); // gonna need to use this to play the sounds
+        audioGame.clip = gameMusic; // start the game with the music playing
+        audioGame.loop = true; // put the music on loop
+        audioGame.Play(); // start the music
     }
 
 
     // Update is called once per frame
     void Update()
     {
-        if (objPlayer.GetComponent<PlayerBehaviour>().getDead() && !stopEverything) // only need to do this once, so I check if everything is already stopped
+        // If you are dead, make the screen black and white, stop the music, play the dark souls sound effect and wait for the player to press R to restart
+        if (objPlayer.GetComponent<PlayerBehaviour>().getDead() && !stopEverything) // only need to do this once, so I check if everything is already stopped with the bool stopEverything
         {
             stopEverything = true;
             volume = objProcessLayer.GetComponent<PostProcessVolume>();
@@ -92,21 +96,25 @@ public class GameLogic : MonoBehaviour
 
             // Play the sound
             audioGame.clip = deathSound;
+            audioGame.loop = false;
             audioGame.Play(0);
             //displayScore.text = textObj.text;
         }
-        if (stopEverything)
+        if (stopEverything) // If you died, display the message on how to restart and restart the game if you actually press the button
         {
-            displayScore.text = playerScore.ToString() + "\nPress R to Restart!";
+            displayScore.text = "Score: " + playerScore.ToString() + "\n\n\n\n\n\nPress R to Restart!";
             
             if (Input.GetKeyDown(KeyCode.R))
             {
+                // Restart the level if the player press R, but only if he is dead
                 SceneManager.LoadScene(0);
                 //Application.LoadLevel(0);
             }
         }
+        // if the player is still alive, spawn the pipes outside of the screen in a random amount of time and destroy them when they get off the screen to the left
         else
         {
+            // Before I had two timers, one for each pipe, but since I now spawn them always at the same X position, there's no need for 2 timers, but I'm too lazy to change the names
             timeCountPipeDown += Time.deltaTime;
             //timeCountPipeUp += Time.deltaTime;
             if (timeCountPipeDown >= randomTimePipeDown)
@@ -135,7 +143,7 @@ public class GameLogic : MonoBehaviour
                 newPipeUp.transform.localScale = new Vector3(newPipeUp.transform.localScale.x, randomSize1);
             }
 
-            displayScore.text = playerScore.ToString(); // Always update this score
+            displayScore.text = "Score: " + playerScore.ToString(); // Always update this score
 
 
             /*
@@ -151,6 +159,6 @@ public class GameLogic : MonoBehaviour
 
     public void addScore()
     {
-        playerScore++;
+        playerScore+=0.5f; // THis is gonna be called twice, since I'm too lazy to find a way to only call it once while using the same script for both of the pipes, so the lazy way to solve it is like this
     }
 }
