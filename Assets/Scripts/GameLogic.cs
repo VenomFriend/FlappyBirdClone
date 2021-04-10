@@ -27,6 +27,15 @@ public class GameLogic : MonoBehaviour
     PostProcessVolume volume;
     ColorGrading colorGradingLayer;
 
+    GameObject txtCanvas;
+    Text txtYouDied;
+
+
+    //Get the audio for when you die
+    AudioSource audioGame;
+
+    public AudioClip deathSound;
+    public AudioClip gameMusic;
 
     private bool stopEverything;
 
@@ -45,21 +54,51 @@ public class GameLogic : MonoBehaviour
         displayScore = txtScore.GetComponent<Text>();
         displayScore.text = playerScore.ToString();
         stopEverything = false;
+        txtCanvas = GameObject.Find("Canvas");
+        txtYouDied = Resources.Load<Text>("YouDied");
+
+        audioGame = GetComponent<AudioSource>();
     }
+
 
     // Update is called once per frame
     void Update()
     {
-        if (objPlayer.GetComponent<PlayerBehaviour>().getDead())
+        if (objPlayer.GetComponent<PlayerBehaviour>().getDead() && !stopEverything) // only need to do this once, so I check if everything is already stopped
         {
             stopEverything = true;
             volume = objProcessLayer.GetComponent<PostProcessVolume>();
             volume.profile.TryGetSettings<ColorGrading>(out colorGradingLayer);
+            
+            //Make everything grayscale
             colorGradingLayer.saturation.value = -100.0f;
+
+            // Try to make a black square to put the text on
+
+            GameObject blackRectangleObject = new GameObject();
+            blackRectangleObject.transform.SetParent(txtCanvas.transform);
+            Image imageBlackRectangle = blackRectangleObject.AddComponent<Image>();
+            imageBlackRectangle.color = Color.black;
+
+            blackRectangleObject.transform.position = new Vector3(0, 0, 0);
+            imageBlackRectangle.transform.localScale = new Vector3(12, 2, 0);
+
+
+
+            //Show the "YOU DIED" text on screen
+            Text textObj = Instantiate(txtYouDied, new Vector2(-10.0f, -435.0f), Quaternion.identity);
+            textObj.transform.SetParent(txtCanvas.transform, false);
+
+
+            // Play the sound
+            audioGame.clip = deathSound;
+            audioGame.Play(0);
+            //displayScore.text = textObj.text;
         }
         if (stopEverything)
         {
             displayScore.text = playerScore.ToString() + "\nPress R to Restart!";
+            
             if (Input.GetKeyDown(KeyCode.R))
             {
                 SceneManager.LoadScene(0);
